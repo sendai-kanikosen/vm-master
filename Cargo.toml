@@ -1,0 +1,32 @@
+[package]
+name = "vm-master"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "app"
+path = "src/bin/app.rs"
+
+[workspace]
+members = ["api", "kernel", "adapter"]
+
+[workspace.dependencies]
+adapter = { path = "./adapter"}
+api = { path = "./api"}
+kernel = { path = "./kernel"}
+axum = {version = "0.7.5", features = ["macros"]}
+sqlx = { version = "0.7.3", features = [
+    "uuid",
+    "chrono",
+    "macros",
+    "postgres",
+    "migrate",
+] }
+tokio = { version = "1.37.0", features = ["full"]}
+
+[dependencies]
+adapter.workspace = true
+api.workspace = true
+tokio.workspace = true
+axum.workspace = true
+sqlx.workspace = true
