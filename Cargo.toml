@@ -11,18 +11,18 @@ path = "src/bin/app.rs"
 members = ["api", "kernel", "adapter"]
 
 [workspace.dependencies]
-adapter = { path = "./adapter"}
-api = { path = "./api"}
-kernel = { path = "./kernel"}
-axum = {version = "0.7.5", features = ["macros"]}
-sqlx = { version = "0.7.3", features = [
+adapter = { path = "./adapter" }
+api = { path = "./api" }
+kernel = { path = "./kernel" }
+axum = { version = "0.7.7", features = ["macros"] }
+sqlx = { version = "0.8.2", features = [
     "uuid",
     "chrono",
     "macros",
     "postgres",
     "migrate",
 ] }
-tokio = { version = "1.37.0", features = ["full"]}
+tokio = { version = "1.41.0", features = ["full"] }
 
 [dependencies]
 adapter.workspace = true
