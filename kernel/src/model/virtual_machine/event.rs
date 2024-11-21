@@ -5,3 +5,8 @@ pub struct CreateVirtualMachine {
     pub template_id: Uuid,
     pub name: String,
 }
+
+pub struct DeleteVirtualMachine {
+    pub user_id: Uuid,
+    pub virual_machine_id: Uuid,
+}

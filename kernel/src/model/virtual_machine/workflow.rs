@@ -4,6 +4,8 @@ use crate::repository::{
 };
 use std::sync::Arc;
 
+use super::event::DeleteVirtualMachine;
+
 pub struct VirtualMachineWorkflow {
     db: Arc<dyn VirtualMachineRepository>,
     proxmox_api: Arc<dyn ProxmoxApiRepository>,
@@ -23,6 +25,15 @@ impl VirtualMachineWorkflow {
     ) -> VirtualMachine {
         let virtual_machine = self.db.insert(create_virtual_machine);
         self.proxmox_api.create_vm(virtual_machine);
+        virtual_machine
+    }
+
+    pub fn delete_virtual_machine(
+        &self,
+        delete_virtual_machine: DeleteVirtualMachine,
+    ) -> VirtualMachine {
+        let virtual_machine = self.db.delete(delete_virtual_machine);
+        self.proxmox_api.delete_vm(virtual_machine);
         virtual_machine
     }
 }
