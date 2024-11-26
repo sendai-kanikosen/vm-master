@@ -4,6 +4,7 @@ use uuid::Uuid;
 pub mod event;
 pub mod workflow;
 
+#[derive(Clone)]
 pub struct VirtualMachine {
     pub id: Uuid,
     pub name: String,
@@ -12,5 +13,5 @@ pub struct VirtualMachine {
     pub update_at: DateTime<Utc>,
     pub template_id: Uuid,
 }
-
+#[derive(Clone)]
 pub enum VirtualMachineStatus {}
