@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 uuid.workspace = true
 chrono.workspace = true
+async-trait.workspace = true
