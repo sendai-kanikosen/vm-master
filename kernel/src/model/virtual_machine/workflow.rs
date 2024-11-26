@@ -19,21 +19,21 @@ impl VirtualMachineWorkflow {
         Self { db, proxmox_api }
     }
 
-    pub fn create_virtual_machine(
+    pub async fn create_virtual_machine(
         &self,
         create_virtual_machine: CreateVirtualMachine,
     ) -> VirtualMachine {
-        let virtual_machine = self.db.insert(create_virtual_machine);
-        self.proxmox_api.create_vm(virtual_machine);
+        let virtual_machine = self.db.insert(create_virtual_machine).await;
+        self.proxmox_api.create_vm(virtual_machine.clone());
         virtual_machine
     }
 
-    pub fn delete_virtual_machine(
+    pub async fn delete_virtual_machine(
         &self,
         delete_virtual_machine: DeleteVirtualMachine,
     ) -> VirtualMachine {
-        let virtual_machine = self.db.delete(delete_virtual_machine);
-        self.proxmox_api.delete_vm(virtual_machine);
+        let virtual_machine = self.db.delete(delete_virtual_machine).await;
+        self.proxmox_api.delete_vm(virtual_machine.clone());
         virtual_machine
     }
 }
