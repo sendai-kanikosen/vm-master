@@ -879,7 +879,6 @@ dependencies = [
 name = "kernel"
 version = "0.1.0"
 dependencies = [
- "async-trait",
  "chrono",
  "uuid",
 ]
@@ -1933,7 +1932,6 @@ version = "0.1.0"
 dependencies = [
  "adapter",
  "api",
- "async-trait",
  "axum",
  "sqlx",
  "tokio",

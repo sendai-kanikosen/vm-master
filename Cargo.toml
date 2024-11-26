@@ -25,7 +25,6 @@ sqlx = { version = "0.8.2", features = [
 tokio = { version = "1.41.0", features = ["full"] }
 uuid = { version = "1.11.0", features = ["v4"] }
 chrono = "0.4.38"
-async-trait = "0.1.83"
 
 [dependencies]
 adapter.workspace = true
@@ -33,5 +32,3 @@ api.workspace = true
 tokio.workspace = true
 axum.workspace = true
 sqlx.workspace = true
-async-trait.workspace = true
-
