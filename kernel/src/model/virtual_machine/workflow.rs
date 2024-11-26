@@ -1,5 +1,5 @@
 use crate::model::virtual_machine::{
-    event::{CreateVirtualMachine, DeleteVirtualMachine, ReadVirtualMachine, UpdateVirtualMachine},
+    event::{CreateVirtualMachine, DeleteVirtualMachine, FindVirtualMachine, UpdateVirtualMachine},
     VirtualMachine,
 };
 use crate::repository::{
@@ -38,11 +38,11 @@ impl VirtualMachineWorkflow {
         virtual_machine
     }
 
-    pub async fn read_virtual_machine(
+    pub async fn find_virtual_machine(
         &self,
-        read_virtual_machine: ReadVirtualMachine,
+        find_virtual_machine: FindVirtualMachine,
     ) -> VirtualMachine {
-        let virtual_machine = self.db.read(read_virtual_machine).await;
+        let virtual_machine = self.db.find(find_virtual_machine).await;
         self.proxmox_api.fetch_vm(virtual_machine.clone()).await;
         virtual_machine
     }
@@ -51,8 +51,8 @@ impl VirtualMachineWorkflow {
         &self,
         update_virtual_machine: UpdateVirtualMachine,
     ) -> VirtualMachine {
-        let virtual_machine = self.db.patch(update_virtual_machine).await;
-        self.proxmox_api.patch_vm(virtual_machine.clone()).await;
+        let virtual_machine = self.db.update(update_virtual_machine).await;
+        self.proxmox_api.update_vm(virtual_machine.clone()).await;
         virtual_machine
     }
 }

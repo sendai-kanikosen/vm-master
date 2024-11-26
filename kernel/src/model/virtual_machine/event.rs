@@ -11,13 +11,11 @@ pub struct DeleteVirtualMachine {
     pub virual_machine_id: Uuid,
 }
 
-pub struct ReadVirtualMachine {
-    pub user_id: Uuid,
+pub struct FindVirtualMachine {
     pub virtual_machine_id: Uuid,
 }
 
 pub struct UpdateVirtualMachine {
-    pub user_id: Uuid,
     pub virtual_machine_id: Uuid,
     pub name: String,
 }
