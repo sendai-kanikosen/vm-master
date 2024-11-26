@@ -1933,7 +1933,6 @@ version = "0.1.0"
 dependencies = [
  "adapter",
  "api",
- "async-trait",
  "axum",
  "sqlx",
  "tokio",

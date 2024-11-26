@@ -33,5 +33,4 @@ api.workspace = true
 tokio.workspace = true
 axum.workspace = true
 sqlx.workspace = true
-async-trait.workspace = true
 
