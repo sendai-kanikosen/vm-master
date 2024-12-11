@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 kernel.workspace = true
+sqlx.workspace = true
+uuid.workspace = true
