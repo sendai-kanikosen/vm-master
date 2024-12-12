@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 kernel.workspace = true
+axum.workspace = true
+tokio.workspace = true
