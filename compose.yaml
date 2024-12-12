@@ -1,0 +1,7 @@
+services:
+  postgres:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    environment:
+      POSTGRES_PASSWORD: password
