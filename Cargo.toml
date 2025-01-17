@@ -14,7 +14,7 @@ members = ["api", "kernel", "adapter"]
 adapter = { path = "./adapter" }
 api = { path = "./api" }
 kernel = { path = "./kernel" }
-axum = { version = "0.7.7", features = ["macros"] }
+axum = { version = "0.8.1", features = ["macros"] }
 sqlx = { version = "0.8.2", features = [
   "uuid",
   "chrono",
@@ -28,6 +28,9 @@ chrono = "0.4.38"
 async-trait = "0.1.83"
 thiserror = "2.0.3"
 anyhow = "1.0.93"
+utoipa = "5.3.1"
+utoipa-swagger-ui = "8.1.1"
+serde = { version = "1.0.217", features = ["derive"] }
 
 [dependencies]
 adapter.workspace = true
@@ -35,3 +38,7 @@ api.workspace = true
 tokio.workspace = true
 axum.workspace = true
 sqlx.workspace = true
+utoipa.workspace = true
+utoipa-swagger-ui = { workspace = true, features = ["axum"] }
+serde.workspace = true
+

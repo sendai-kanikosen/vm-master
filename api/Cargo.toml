@@ -7,3 +7,6 @@ edition = "2021"
 kernel.workspace = true
 axum.workspace = true
 tokio.workspace = true
+utoipa.workspace = true
+utoipa-swagger-ui = { workspace = true, features = ["axum"] }
+serde.workspace = true
