@@ -1,10 +1,7 @@
-use std::str;
-
 use anyhow;
-use reqwest::header::InvalidHeaderValue;
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION};
 use reqwest::{Client, Response};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use kernel::error::{ProxmoxApiError, ProxmoxApiResult};
 
@@ -36,6 +33,27 @@ impl ProxmoxAPIClient {
         let mut headers = HeaderMap::new();
         headers.insert(AUTHORIZATION, HeaderValue::from_str(&self.token).unwrap());
         let response = self.client.get(url).headers(headers).send().await?;
+        Ok(response)
+    }
+
+    pub async fn post<T: Serialize>(&self, path: &str, body: &T) -> reqwest::Result<Response> {
+        let url = format!("{}{}", self.base_url, path);
+
+        let mut headers = HeaderMap::new();
+        headers.insert(AUTHORIZATION, HeaderValue::from_str(&self.token).unwrap());
+        headers.insert(
+            reqwest::header::CONTENT_TYPE,
+            HeaderValue::from_static("application/json"),
+        );
+
+        let response = self
+            .client
+            .post(url)
+            .headers(headers)
+            .json(body)
+            .send()
+            .await?;
+
         Ok(response)
     }
 
