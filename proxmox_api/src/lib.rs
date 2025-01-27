@@ -18,6 +18,19 @@ pub struct ProxmoxAPIClient {
     token: String,
 }
 
+#[derive(Serialize)]
+pub struct CloneRequest {
+    pub newid: u32,
+    pub name: Option<String>,
+    pub target: Option<String>,
+    pub full: u32,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CloneResponse {
+    pub data: Option<String>,
+}
+
 impl ProxmoxAPIClient {
     pub fn new(base_url: &str, token: &str) -> Self {
         let client = Client::new();
@@ -65,6 +78,47 @@ impl ProxmoxAPIClient {
                 if response.status().is_success() {
                     // JSONレスポンスをパース
                     let json: VersionInfo = response
+                        .json()
+                        .await
+                        .map_err(ProxmoxApiWrapperError::from)?;
+                    Ok(json)
+                } else {
+                    // エラーステータスの場合はエラーを返す
+                    let status = response.status();
+                    let error_text = response
+                        .text()
+                        .await
+                        .unwrap_or_else(|_| "No response body".to_string());
+                    Err(ProxmoxApiError(anyhow::anyhow!(
+                        "Request failed with status {}: {}",
+                        status,
+                        error_text
+                    )))
+                }
+            }
+            Err(err) => {
+                // リクエスト自体が失敗した場合のエラーハンドリング
+                Err(ProxmoxApiError(anyhow::anyhow!(
+                    "Failed to send request: {}",
+                    err
+                )))
+            }
+        }
+    }
+
+    pub async fn clone_vm(
+        &self,
+        node: &str,
+        vmid: &str,
+        body: CloneRequest,
+    ) -> ProxmoxApiResult<CloneResponse> {
+        let url = format!("{}/nodes/{}/qemu/{}/clone", self.base_url, node, vmid);
+        match self.post(&url, &body).await {
+            Ok(response) => {
+                // ステータスコードの確認
+                if response.status().is_success() {
+                    // JSONレスポンスをパース
+                    let json: CloneResponse = response
                         .json()
                         .await
                         .map_err(ProxmoxApiWrapperError::from)?;
