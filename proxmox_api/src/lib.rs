@@ -12,6 +12,24 @@ pub struct VersionInfo {
     pub version: String,
 }
 
+#[derive(Serialize)]
+pub struct CreateVirtualMachineRequest {
+    /// 仮想マシンのユニークなID
+    pub vmid: u32,
+    /// 仮想マシンの名前
+    pub name: String,
+    /// 割り当てるメモリのサイズ
+    pub memory: u64,
+    /// 割り当てるCPUコア数
+    pub cores: u32,
+    /// ストレージの設定
+    pub ide0: String,
+    /// ネットワークの設定
+    pub net0: String,
+    /// OSタイプの指定
+    pub ostype: String,
+}
+
 pub struct ProxmoxAPIClient {
     client: Client,
     base_url: String,
@@ -57,20 +75,18 @@ impl ProxmoxAPIClient {
         Ok(response)
     }
 
-    pub async fn get_version(&self) -> ProxmoxApiResult<VersionInfo> {
-        // 非同期関数を呼び出すには `await` が必要
-        match self.get("/version").await {
+    pub async fn create_virtual_machine(
+        &self,
+        node: &str,
+        body: &CreateVirtualMachineRequest,
+    ) -> ProxmoxApiResult<Response> {
+        let path = format!("/nodes/{}/qemu", node);
+
+        match self.post(&path, body).await {
             Ok(response) => {
-                // ステータスコードの確認
                 if response.status().is_success() {
-                    // JSONレスポンスをパース
-                    let json: VersionInfo = response
-                        .json()
-                        .await
-                        .map_err(ProxmoxApiWrapperError::from)?;
-                    Ok(json)
+                    Ok(response)
                 } else {
-                    // エラーステータスの場合はエラーを返す
                     let status = response.status();
                     let error_text = response
                         .text()
@@ -83,13 +99,39 @@ impl ProxmoxAPIClient {
                     )))
                 }
             }
-            Err(err) => {
-                // リクエスト自体が失敗した場合のエラーハンドリング
-                Err(ProxmoxApiError(anyhow::anyhow!(
-                    "Failed to send request: {}",
-                    err
-                )))
+            Err(err) => Err(ProxmoxApiError(anyhow::anyhow!(
+                "Failed to send request: {}",
+                err
+            ))),
+        }
+    }
+
+    pub async fn get_version(&self) -> ProxmoxApiResult<VersionInfo> {
+        match self.get("/version").await {
+            Ok(response) => {
+                if response.status().is_success() {
+                    let json: VersionInfo = response
+                        .json()
+                        .await
+                        .map_err(ProxmoxApiWrapperError::from)?;
+                    Ok(json)
+                } else {
+                    let status = response.status();
+                    let error_text = response
+                        .text()
+                        .await
+                        .unwrap_or_else(|_| "No response body".to_string());
+                    Err(ProxmoxApiError(anyhow::anyhow!(
+                        "Request failed with status {}: {}",
+                        status,
+                        error_text
+                    )))
+                }
             }
+            Err(err) => Err(ProxmoxApiError(anyhow::anyhow!(
+                "Failed to send request: {}",
+                err
+            ))),
         }
     }
 }
@@ -102,7 +144,6 @@ impl From<reqwest::Error> for ProxmoxApiWrapperError {
     }
 }
 
-// ProxmoxApiWrapperError -> ProxmoxApiError への変換
 impl From<ProxmoxApiWrapperError> for ProxmoxApiError {
     fn from(err: ProxmoxApiWrapperError) -> Self {
         ProxmoxApiError(err.0)
