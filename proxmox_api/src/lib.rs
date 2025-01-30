@@ -4,31 +4,8 @@ use reqwest::{Client, Response};
 use serde::{Deserialize, Serialize};
 
 use kernel::error::{ProxmoxApiError, ProxmoxApiResult};
-
-#[derive(Debug, Deserialize)]
-pub struct VersionInfo {
-    pub release: String,
-    pub repoid: String,
-    pub version: String,
-}
-
-#[derive(Serialize)]
-pub struct CreateVirtualMachineRequest {
-    /// 仮想マシンのユニークなID
-    pub vmid: u32,
-    /// 仮想マシンの名前
-    pub name: String,
-    /// 割り当てるメモリのサイズ
-    pub memory: u64,
-    /// 割り当てるCPUコア数
-    pub cores: u32,
-    /// ストレージの設定
-    pub ide0: String,
-    /// ネットワークの設定
-    pub net0: String,
-    /// OSタイプの指定
-    pub ostype: String,
-}
+use proxmox_api::nodes::node::qemu::PostParams;
+use proxmox_api::version::GetOutput;
 
 pub struct ProxmoxAPIClient {
     client: Client,
@@ -78,7 +55,7 @@ impl ProxmoxAPIClient {
     pub async fn create_virtual_machine(
         &self,
         node: &str,
-        body: &CreateVirtualMachineRequest,
+        body: &PostParams,
     ) -> ProxmoxApiResult<Response> {
         let path = format!("/nodes/{}/qemu", node);
 
@@ -106,11 +83,11 @@ impl ProxmoxAPIClient {
         }
     }
 
-    pub async fn get_version(&self) -> ProxmoxApiResult<VersionInfo> {
+    pub async fn get_version(&self) -> ProxmoxApiResult<GetOutput> {
         match self.get("/version").await {
             Ok(response) => {
                 if response.status().is_success() {
-                    let json: VersionInfo = response
+                    let json: GetOutput = response
                         .json()
                         .await
                         .map_err(ProxmoxApiWrapperError::from)?;
