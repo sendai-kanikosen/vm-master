@@ -1,6 +1,6 @@
 use anyhow;
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION};
-use reqwest::{Client, Response};
+use reqwest::{Client, Method, Response};
 use serde::{Deserialize, Serialize};
 
 use kernel::error::{ProxmoxApiError, ProxmoxApiResult};
@@ -23,33 +23,32 @@ impl ProxmoxAPIClient {
         }
     }
 
-    async fn get(&self, path: &str) -> reqwest::Result<Response> {
+    async fn request<T: Serialize>(
+        &self,
+        method: Method,
+        path: &str,
+        body: Option<&T>,
+    ) -> reqwest::Result<Response> {
         let url = format!("{}{}", self.base_url, path);
         let mut headers = HeaderMap::new();
         headers.insert(AUTHORIZATION, HeaderValue::from_str(&self.token).unwrap());
-        let response = self.client.get(url).headers(headers).send().await?;
+
+        let request_builder = self.client.request(method, url).headers(headers);
+        let response = if let Some(body) = body {
+            request_builder.json(body).send().await?
+        } else {
+            request_builder.send().await?
+        };
+
         Ok(response)
     }
 
-    pub async fn post<T: Serialize>(&self, path: &str, body: &T) -> reqwest::Result<Response> {
-        let url = format!("{}{}", self.base_url, path);
+    async fn get(&self, path: &str) -> reqwest::Result<Response> {
+        self.request::<()>(Method::GET.clone(), path, None).await
+    }
 
-        let mut headers = HeaderMap::new();
-        headers.insert(AUTHORIZATION, HeaderValue::from_str(&self.token).unwrap());
-        headers.insert(
-            reqwest::header::CONTENT_TYPE,
-            HeaderValue::from_static("application/json"),
-        );
-
-        let response = self
-            .client
-            .post(url)
-            .headers(headers)
-            .json(body)
-            .send()
-            .await?;
-
-        Ok(response)
+    async fn post<T: Serialize>(&self, path: &str, body: &T) -> reqwest::Result<Response> {
+        self.request(Method::POST, path, Some(body)).await
     }
 
     pub async fn create_virtual_machine(
