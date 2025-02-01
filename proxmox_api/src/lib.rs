@@ -5,8 +5,8 @@ use serde::{Deserialize, Serialize};
 
 use kernel::error::{ProxmoxApiError, ProxmoxApiResult};
 use proxmox_api::nodes::node::qemu::vmid::clone::PostParams as ClonePostParms;
-use proxmox_api::nodes::node::qemu::PostParams;
-use proxmox_api::version::GetOutput;
+use proxmox_api::nodes::node::qemu::PostParams as CreateVirtualMachineRequest;
+use proxmox_api::version::GetOutput as VersionInfo;
 
 pub struct ProxmoxAPIClient {
     client: Client,
@@ -55,7 +55,7 @@ impl ProxmoxAPIClient {
     pub async fn create_virtual_machine(
         &self,
         node: &str,
-        body: &PostParams,
+        body: &CreateVirtualMachineRequest,
     ) -> ProxmoxApiResult<Response> {
         let path = format!("/nodes/{}/qemu", node);
 
@@ -83,11 +83,11 @@ impl ProxmoxAPIClient {
         }
     }
 
-    pub async fn get_version(&self) -> ProxmoxApiResult<GetOutput> {
+    pub async fn get_version(&self) -> ProxmoxApiResult<VersionInfo> {
         match self.get("/version").await {
             Ok(response) => {
                 if response.status().is_success() {
-                    let json: GetOutput = response
+                    let json: VersionInfo = response
                         .json()
                         .await
                         .map_err(ProxmoxApiWrapperError::from)?;
