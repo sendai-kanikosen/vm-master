@@ -4,6 +4,7 @@ use reqwest::{Client, Method, Response};
 use serde::{Deserialize, Serialize};
 
 use kernel::error::{ProxmoxApiError, ProxmoxApiResult};
+use proxmox_api::nodes::node::qemu::vmid::clone::PostParams as ClonePostParms;
 use proxmox_api::nodes::node::qemu::PostParams;
 use proxmox_api::version::GetOutput;
 
@@ -91,6 +92,37 @@ impl ProxmoxAPIClient {
                         .await
                         .map_err(ProxmoxApiWrapperError::from)?;
                     Ok(json)
+                } else {
+                    let status = response.status();
+                    let error_text = response
+                        .text()
+                        .await
+                        .unwrap_or_else(|_| "No response body".to_string());
+                    Err(ProxmoxApiError(anyhow::anyhow!(
+                        "Request failed with status {}: {}",
+                        status,
+                        error_text
+                    )))
+                }
+            }
+            Err(err) => Err(ProxmoxApiError(anyhow::anyhow!(
+                "Failed to send request: {}",
+                err
+            ))),
+        }
+    }
+
+    pub async fn clone_vm(
+        &self,
+        node: &str,
+        vmid: &str,
+        body: ClonePostParms,
+    ) -> ProxmoxApiResult<Response> {
+        let url = format!(" /{}/nodes/{}/qemu/{}/clone", self.base_url, node, vmid);
+        match self.post(&url, &body).await {
+            Ok(response) => {
+                if response.status().is_success() {
+                    Ok(response)
                 } else {
                     let status = response.status();
                     let error_text = response
