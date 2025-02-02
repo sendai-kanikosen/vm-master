@@ -4,8 +4,9 @@ use reqwest::{Client, Method, Response};
 use serde::{Deserialize, Serialize};
 
 use kernel::error::{ProxmoxApiError, ProxmoxApiResult};
-use proxmox_api::nodes::node::qemu::PostParams;
-use proxmox_api::version::GetOutput;
+use proxmox_api::nodes::node::qemu::vmid::clone::PostParams as ClonePostParms;
+use proxmox_api::nodes::node::qemu::PostParams as CreateVirtualMachineRequest;
+use proxmox_api::version::GetOutput as VersionInfo;
 
 pub struct ProxmoxAPIClient {
     client: Client,
@@ -54,7 +55,7 @@ impl ProxmoxAPIClient {
     pub async fn create_virtual_machine(
         &self,
         node: &str,
-        body: &PostParams,
+        body: &CreateVirtualMachineRequest,
     ) -> ProxmoxApiResult<Response> {
         let path = format!("/nodes/{}/qemu", node);
 
@@ -82,15 +83,46 @@ impl ProxmoxAPIClient {
         }
     }
 
-    pub async fn get_version(&self) -> ProxmoxApiResult<GetOutput> {
+    pub async fn get_version(&self) -> ProxmoxApiResult<VersionInfo> {
         match self.get("/version").await {
             Ok(response) => {
                 if response.status().is_success() {
-                    let json: GetOutput = response
+                    let json: VersionInfo = response
                         .json()
                         .await
                         .map_err(ProxmoxApiWrapperError::from)?;
                     Ok(json)
+                } else {
+                    let status = response.status();
+                    let error_text = response
+                        .text()
+                        .await
+                        .unwrap_or_else(|_| "No response body".to_string());
+                    Err(ProxmoxApiError(anyhow::anyhow!(
+                        "Request failed with status {}: {}",
+                        status,
+                        error_text
+                    )))
+                }
+            }
+            Err(err) => Err(ProxmoxApiError(anyhow::anyhow!(
+                "Failed to send request: {}",
+                err
+            ))),
+        }
+    }
+
+    pub async fn clone_vm(
+        &self,
+        node: &str,
+        vmid: &str,
+        body: ClonePostParms,
+    ) -> ProxmoxApiResult<Response> {
+        let url = format!(" /{}/nodes/{}/qemu/{}/clone", self.base_url, node, vmid);
+        match self.post(&url, &body).await {
+            Ok(response) => {
+                if response.status().is_success() {
+                    Ok(response)
                 } else {
                     let status = response.status();
                     let error_text = response
