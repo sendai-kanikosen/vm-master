@@ -45,11 +45,19 @@ impl ProxmoxAPIClient {
     }
 
     async fn get(&self, path: &str) -> reqwest::Result<Response> {
-        self.request::<()>(Method::GET.clone(), path, None).await
+        self.request::<()>(Method::GET, path, None).await
     }
 
     async fn post<T: Serialize>(&self, path: &str, body: &T) -> reqwest::Result<Response> {
         self.request(Method::POST, path, Some(body)).await
+    }
+
+    async fn delete(&self, path: &str) -> reqwest::Result<Response> {
+        self.request::<()>(Method::DELETE, path, None).await
+    }
+
+    async fn put<T: Serialize>(&self, path: &str, body: &T) -> reqwest::Result<Response> {
+        self.request(Method::PUT, path, Some(body)).await
     }
 
     pub async fn create_virtual_machine(
