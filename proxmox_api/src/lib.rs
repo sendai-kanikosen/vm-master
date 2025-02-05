@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use kernel::error::{ProxmoxApiError, ProxmoxApiResult};
 use proxmox_api::nodes::node::qemu::vmid::clone::PostParams as ClonePostParms;
+use proxmox_api::nodes::node::qemu::vmid::status::current::GetOutput as VirtualMachineStatus;
 use proxmox_api::nodes::node::qemu::PostParams as CreateVirtualMachineRequest;
 use proxmox_api::version::GetOutput as VersionInfo;
 
@@ -45,11 +46,19 @@ impl ProxmoxAPIClient {
     }
 
     async fn get(&self, path: &str) -> reqwest::Result<Response> {
-        self.request::<()>(Method::GET.clone(), path, None).await
+        self.request::<()>(Method::GET, path, None).await
     }
 
     async fn post<T: Serialize>(&self, path: &str, body: &T) -> reqwest::Result<Response> {
         self.request(Method::POST, path, Some(body)).await
+    }
+
+    async fn delete(&self, path: &str) -> reqwest::Result<Response> {
+        self.request::<()>(Method::DELETE, path, None).await
+    }
+
+    async fn put<T: Serialize>(&self, path: &str, body: &T) -> reqwest::Result<Response> {
+        self.request(Method::PUT, path, Some(body)).await
     }
 
     pub async fn create_virtual_machine(
@@ -123,6 +132,43 @@ impl ProxmoxAPIClient {
             Ok(response) => {
                 if response.status().is_success() {
                     Ok(response)
+                } else {
+                    let status = response.status();
+                    let error_text = response
+                        .text()
+                        .await
+                        .unwrap_or_else(|_| "No response body".to_string());
+                    Err(ProxmoxApiError(anyhow::anyhow!(
+                        "Request failed with status {}: {}",
+                        status,
+                        error_text
+                    )))
+                }
+            }
+            Err(err) => Err(ProxmoxApiError(anyhow::anyhow!(
+                "Failed to send request: {}",
+                err
+            ))),
+        }
+    }
+
+    pub async fn get_vm_status(
+        &self,
+        node: &str,
+        vmid: &str,
+    ) -> ProxmoxApiResult<VirtualMachineStatus> {
+        let url = format!(
+            "/{}/nodes/{}/qemu/{}/status/current",
+            self.base_url, node, vmid
+        );
+        match self.get(&url).await {
+            Ok(response) => {
+                if response.status().is_success() {
+                    let json: VirtualMachineStatus = response
+                        .json()
+                        .await
+                        .map_err(ProxmoxApiWrapperError::from)?;
+                    Ok(json)
                 } else {
                     let status = response.status();
                     let error_text = response
