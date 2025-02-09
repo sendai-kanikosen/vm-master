@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use anyhow;
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION};
 use reqwest::{Client, Method, Response};
@@ -6,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use kernel::error::{ProxmoxApiError, ProxmoxApiResult};
 use proxmox_api::nodes::node::qemu::vmid::clone::PostParams as ClonePostParms;
 use proxmox_api::nodes::node::qemu::vmid::status::current::GetOutput as VirtualMachineStatus;
+use proxmox_api::nodes::node::qemu::vmid::template::PostParams as TemplateParms;
 use proxmox_api::nodes::node::qemu::PostParams as CreateVirtualMachineRequest;
 use proxmox_api::version::GetOutput as VersionInfo;
 
