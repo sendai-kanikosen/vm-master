@@ -6,7 +6,11 @@ version = 4
 name = "adapter"
 version = "0.1.0"
 dependencies = [
+ "dotenvy",
  "kernel",
+ "proxmox-api",
+ "sqlx",
+ "tokio",
 ]
 
 [[package]]
@@ -67,8 +71,13 @@ checksum = "4c95c10ba0b00a02636238b814946408b1322d5ac4760326e6fb8ec956d85775"
 name = "api"
 version = "0.1.0"
 dependencies = [
+ "adapter",
+ "anyhow",
  "axum",
  "kernel",
+ "proxmox-api",
+ "pve_api",
+ "serde",
  "tokio",
 ]
 
@@ -1002,6 +1011,9 @@ dependencies = [
  "anyhow",
  "async-trait",
  "chrono",
+ "proxmox-api",
+ "serde",
+ "sqlx",
  "thiserror 2.0.3",
  "uuid",
 ]
@@ -1372,7 +1384,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "proxmox_api"
+name = "pve_api"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -1890,6 +1902,8 @@ dependencies = [
  "smallvec",
  "sqlformat",
  "thiserror 1.0.69",
+ "tokio",
+ "tokio-stream",
  "tracing",
  "url",
  "uuid",
@@ -1930,6 +1944,7 @@ dependencies = [
  "sqlx-sqlite",
  "syn",
  "tempfile",
+ "tokio",
  "url",
 ]
 
@@ -2245,6 +2260,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokio-stream"
+version = "0.1.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eca58d7bba4a75707817a2c44174253f9236b2d5fbd055602e9d5c07c139a047"
+dependencies = [
+ "futures-core",
+ "pin-project-lite",
+ "tokio",
+]
+
+[[package]]
 name = "tokio-util"
 version = "0.7.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2420,7 +2446,9 @@ dependencies = [
  "anyhow",
  "api",
  "axum",
+ "dotenvy",
  "proxmox-api",
+ "pve_api",
  "sqlx",
  "tokio",
 ]

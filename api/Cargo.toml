@@ -5,5 +5,10 @@ edition = "2021"
 
 [dependencies]
 kernel.workspace = true
+adapter.workspace = true
 axum.workspace = true
 tokio.workspace = true
+proxmox-api.workspace = true
+pve_api.workspace = true
+serde.workspace = true
+anyhow.workspace = true
