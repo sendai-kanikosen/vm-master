@@ -1,7 +1,7 @@
 services:
   db-container:
     image: postgres:latest
-    container_name: postgres_comtainer
+    container_name: postgres_container
     volumes:
       - postgres_db_data:/var/lib/postgresql/data
     environment:
@@ -13,6 +13,7 @@ services:
 
 networks:
   mynetwork:
+
 
 volumes:
   postgres_db_data:

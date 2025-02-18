@@ -1,10 +1,8 @@
-use uuid::Uuid;
+use serde::Deserialize;
+use sqlx::FromRow;
 
+#[derive(Deserialize, sqlx::FromRow)]
 pub struct Template {
-    pub id: Uuid,
-    pub name: String,
-    pub iso: String,
-    pub core: usize,
-    pub memory: usize,
-    pub storage: usize,
+    pub vmid: i32,
+    pub node: String,
 }

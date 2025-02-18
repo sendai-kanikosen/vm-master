@@ -5,3 +5,7 @@ edition = "2021"
 
 [dependencies]
 kernel.workspace = true
+sqlx.workspace = true
+dotenvy.workspace = true
+tokio.workspace = true
+proxmox-api.workspace = true

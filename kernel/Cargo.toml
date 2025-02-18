@@ -9,3 +9,6 @@ async-trait.workspace = true
 chrono.workspace = true
 thiserror.workspace = true
 uuid.workspace = true
+proxmox-api.workspace = true
+serde.workspace = true
+sqlx.workspace = true
